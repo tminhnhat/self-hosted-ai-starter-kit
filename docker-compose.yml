@@ -168,7 +168,7 @@ services:
     volumes:
       - caddy_data:/data
       - ${DATA_FOLDER}/caddy_config:/config
-      - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfiles
+      - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfile
     env_file:
       - .env
     depends_on:
