@@ -158,7 +158,7 @@ services:
     image: ollama/ollama:rocm
     depends_on:
      - ollama-gpu-amd
-	 
+
   caddy:
     image: caddy:latest
     restart: unless-stopped
