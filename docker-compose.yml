@@ -173,4 +173,4 @@ services:
       - .env
     depends_on:
       n8n:
-        condition: service_healthy
+        condition: service_completed_successfully
