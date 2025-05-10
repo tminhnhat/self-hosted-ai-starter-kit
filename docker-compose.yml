@@ -171,3 +171,6 @@ services:
       - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfiles
     env_file:
       - .env
+    depends_on:
+      n8n:
+        condition: service_healthy
