@@ -1,15 +1,20 @@
+	
 volumes:
   n8n_storage:
+    external: true
   postgres_storage:
   ollama_storage:
   qdrant_storage:
+  caddy_data:
+    external: true
+
 
 networks:
-  demo:
+  n8n_ai:
 
 x-n8n: &service-n8n
   image: n8nio/n8n:latest
-  networks: ['demo']
+  networks: ['n8n_ai']
   environment:
     - DB_TYPE=postgresdb
     - DB_POSTGRESDB_HOST=postgres
@@ -26,7 +31,7 @@ x-n8n: &service-n8n
 x-ollama: &service-ollama
   image: ollama/ollama:latest
   container_name: ollama
-  networks: ['demo']
+  networks: ['n8n_ai']
   restart: unless-stopped
   ports:
     - 11434:11434
@@ -35,7 +40,7 @@ x-ollama: &service-ollama
 
 x-init-ollama: &init-ollama
   image: ollama/ollama:latest
-  networks: ['demo']
+  networks: ['n8n_ai']
   container_name: ollama-pull-llama
   volumes:
     - ollama_storage:/root/.ollama
@@ -50,7 +55,7 @@ services:
   postgres:
     image: postgres:16-alpine
     hostname: postgres
-    networks: ['demo']
+    networks: ['n8n_ai']
     restart: unless-stopped
     environment:
       - POSTGRES_USER
@@ -89,6 +94,13 @@ services:
       - n8n_storage:/home/node/.n8n
       - ./n8n/demo-data:/demo-data
       - ./shared:/data/shared
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,7 +111,7 @@ services:
     image: qdrant/qdrant
     hostname: qdrant
     container_name: qdrant
-    networks: ['demo']
+    networks: ['n8n_ai']
     restart: unless-stopped
     ports:
       - 6333:6333
@@ -147,3 +159,14 @@ services:
     image: ollama/ollama:rocm
     depends_on:
      - ollama-gpu-amd
+	 
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - ${DATA_FOLDER}/caddy_config:/config
+      - ${DATA_FOLDER}/caddy_config/Caddyfile:/etc/caddy/Caddyfiles
