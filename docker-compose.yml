@@ -54,18 +54,19 @@ x-init-ollama: &init-ollama
     - OLLAMA_HOST=ollama:11434
   command:
     - "-c"
-    - "sleep 3; ollama pull llama3.2"
+    - "sleep 3; ollama pull jinaai/jina-embeddings-v3"
 
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: postgres
     hostname: postgres
     networks: ['n8n_ai']
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=n8n
+      - POSTGRES_DB=postgres
     volumes:
       - postgres_storage:/var/lib/postgresql/data
     healthcheck:
@@ -160,6 +161,7 @@ services:
 
   caddy:
     image: caddy:latest
+    container_name: caddy
     restart: unless-stopped
     networks: ['n8n_ai']
     ports:
